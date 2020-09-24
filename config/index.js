@@ -10,6 +10,8 @@ const config = {
   sessionSecret:process.env.SESSION_SECRET,
   twitterConsumerKey:process.env.TWITTER_CONSUMER_KEY,
   twitterConsumerSecret:process.env.TWITTER_CONSUMER_SECRET,
+  facebookClientId: process.env.FACEBOOK_CLIENT_ID,
+  facebookClientSecret: process.env.FACEBOOK_CLIENT_SECRET,
 };
 
 module.exports = { config: config };
