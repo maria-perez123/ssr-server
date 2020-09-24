@@ -1,5 +1,6 @@
 const express = require("express");
 const passport=require('passport')
+const session=require('express-session')
 const boom=require('@hapi/boom')
 const cookieParser=require('cookie-parser')
 const axios=require('axios')
@@ -11,12 +12,18 @@ const TWO_HOURS_IN_SEC=7200000
 // body parser
 app.use(express.json());
 app.use(cookieParser());
+app.use(session({secret:config.sessionSecret}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 //basic strategy
 require('./utils/auth/strategies/basic')
 
 //OAUTH
 require('./utils/auth/strategies/oauth');
+
+//twitter strategy
+require('./utils/auth/strategies/twitter')
 
 app.post("/auth/sign-in", async function(req, res, next) {
   const {rememberMe}=req.body;
@@ -130,6 +137,46 @@ app.get(
     res.status(200).json(user);
   }
 );
+
+app.get(
+  "/auth/google",
+  passport.authenticate("google", {
+    scope: ["email", "profile", "openid"]
+  })
+);
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { session: false }),
+  function(req, res, next) {
+    if (!req.user) {
+      next(boom.unauthorized());
+    }
+
+    const { token, ...user } = req.user;
+
+    res.cookie("token", token, {
+      httpOnly: !config.dev,
+      secure: !config.dev
+    });
+
+    res.status(200).json(user);
+  }
+);
+
+app.get('/auth/twitter', passport.authenticate('twitter'));
+app.get('/auth/twitter/callback', passport.authenticate('twitter', {session:false}),function(req, res, next){
+  if(!req.user){
+    next(boom.unauthorized());
+  }
+  const {token, ...user}=req.user
+
+  res.cookie('token', token,{
+    httpOnly:!config.dev,
+    secure:!config.dev
+  })
+  res.status(200).json(user);
+})
 
 app.listen(config.port, function() {
   console.log(`Listening http://localhost:${config.port}`);
