@@ -14,6 +14,10 @@ app.use(cookieParser());
 
 //basic strategy
 require('./utils/auth/strategies/basic')
+
+//OAUTH
+require('./utils/auth/strategies/oauth');
+
 app.post("/auth/sign-in", async function(req, res, next) {
   const {rememberMe}=req.body;
   passport.authenticate('basic', function(error, data){
@@ -101,6 +105,31 @@ app.delete("/user-movies/:userMovieId", async function(req, res, next) {
     next(error);
   }
 });
+app.get(
+  "/auth/google-oauth",
+  passport.authenticate("google-oauth", {
+    scope: ["email", "profile", "openid"]
+  })
+);
+
+app.get(
+  "/auth/google-oauth/callback",
+  passport.authenticate("google-oauth", { session: false }),
+  function(req, res, next) {
+    if (!req.user) {
+      next(boom.unauthorized());
+    }
+
+    const { token, ...user } = req.user;
+
+    res.cookie("token", token, {
+      httpOnly: !config.dev,
+      secure: !config.dev
+    });
+
+    res.status(200).json(user);
+  }
+);
 
 app.listen(config.port, function() {
   console.log(`Listening http://localhost:${config.port}`);
