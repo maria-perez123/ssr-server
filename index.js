@@ -1,4 +1,5 @@
 const express = require("express");
+const helmet=require('helmet');
 const passport=require('passport')
 const session=require('express-session')
 const boom=require('@hapi/boom')
@@ -15,7 +16,7 @@ app.use(cookieParser());
 app.use(session({secret:config.sessionSecret}));
 app.use(passport.initialize());
 app.use(passport.session());
-
+app.use(helmet());
 //basic strategy
 require('./utils/auth/strategies/basic')
 
