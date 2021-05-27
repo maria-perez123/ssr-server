@@ -14,7 +14,7 @@
     "@hapi/boom": "^7.4.11",
     "axios": "^0.19.2",
     "cookie-parser": "^1.4.5",
-    "dotenv": "^8.2.0",
+    "dotenv": "^8.6.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "helmet": "^4.1.1",
